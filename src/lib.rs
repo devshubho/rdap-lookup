@@ -28,15 +28,17 @@
 
 pub mod bootstrap;
 pub mod cache;
+pub mod classify;
 pub mod client;
 pub mod error;
 pub mod resolver;
 
 pub use bootstrap::{IANA_BOOTSTRAP_URL, Overlay, OverlayEntry, ServerDirectory};
 pub use cache::Cache;
+pub use classify::{Kind, TldIndex};
 pub use client::RdapClient;
 pub use error::{Error, Result};
-pub use resolver::{resolve_tld, to_ascii};
+pub use resolver::{is_idn, resolve_tld, to_ascii, to_unicode};
 
 /// The current time in UTC, formatted as `YYYY-MM-DDTHH:MM:SSZ`.
 ///

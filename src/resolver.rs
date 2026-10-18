@@ -43,6 +43,37 @@ pub fn resolve_tld(domain: &str) -> Result<String> {
     }
 }
 
+/// Whether `tld` is an IDN, i.e. an `xn--` A-label.
+///
+/// ```
+/// # use rdap_lookup::is_idn;
+/// assert!(is_idn("xn--p1ai"));
+/// assert!(!is_idn("com"));
+/// ```
+pub fn is_idn(tld: &str) -> bool {
+    clean(tld).to_ascii_lowercase().starts_with("xn--")
+}
+
+/// The Unicode (U-label) form of an IDN domain or label, if it is one.
+///
+/// ```
+/// # use rdap_lookup::to_unicode;
+/// assert_eq!(to_unicode("xn--p1ai").as_deref(), Some("рф"));
+/// assert_eq!(to_unicode("com"), None);
+/// ```
+pub fn to_unicode(domain: &str) -> Option<String> {
+    let cleaned = clean(domain);
+    if !cleaned.to_ascii_lowercase().starts_with("xn--") {
+        return None;
+    }
+    let (unicode, errors) = idna::domain_to_unicode(cleaned);
+    if errors.is_err() || unicode == cleaned {
+        None
+    } else {
+        Some(unicode)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

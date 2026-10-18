@@ -1,12 +1,14 @@
 //! `rdap-lookup` CLI: resolve a domain to its RDAP server and (optionally)
 //! fetch its RDAP record.
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use clap::Parser;
 use rdap_lookup::{
-    Cache, IANA_BOOTSTRAP_URL, Overlay, RdapClient, ServerDirectory, resolve_tld, to_ascii,
+    Cache, IANA_BOOTSTRAP_URL, Overlay, RdapClient, ServerDirectory, TldIndex, resolve_tld,
+    to_ascii,
 };
 use tracing_subscriber::EnvFilter;
 
@@ -37,6 +39,18 @@ struct Cli {
     /// PATH (use `-` for stdout) instead of looking up a domain.
     #[arg(long, value_name = "PATH")]
     emit_bootstrap: Option<PathBuf>,
+
+    /// TLD classification index JSON (defaults to the embedded copy).
+    #[arg(long, value_name = "PATH")]
+    tlds: Option<PathBuf>,
+
+    /// Print delegated-ccTLD RDAP coverage and the remaining gaps.
+    #[arg(long)]
+    coverage: bool,
+
+    /// Emit machine-readable JSON (used with `--coverage`).
+    #[arg(long)]
+    json: bool,
 }
 
 fn default_cache_dir() -> PathBuf {
@@ -59,26 +73,27 @@ async fn main() -> Result<()> {
         .context("fetching IANA RDAP bootstrap")?;
     let mut directory = ServerDirectory::from_iana(&iana).context("parsing IANA RDAP bootstrap")?;
 
-    let mut overlay_publication: Option<String> = None;
-    if cli.overlay.exists() {
-        let raw = std::fs::read_to_string(&cli.overlay)
-            .with_context(|| format!("reading overlay {}", cli.overlay.display()))?;
-        let overlay: Overlay = serde_json::from_str(&raw)
-            .with_context(|| format!("parsing overlay {}", cli.overlay.display()))?;
-        overlay_publication = overlay.publication().map(str::to_owned);
-        let added = directory.merge_overlay(&overlay);
+    let overlay = load_overlay(&cli)?;
+
+    if cli.coverage {
+        let index = load_index(cli.tlds.as_deref())?;
+        report_coverage(&directory, overlay.as_ref(), &index, cli.json)?;
+        return Ok(());
+    }
+
+    if let Some(overlay) = &overlay {
+        let added = directory.merge_overlay(overlay);
         match overlay.publication() {
             Some(publication) => {
                 tracing::info!("overlay published {publication}; added {added} server(s)")
             }
             None => tracing::info!("overlay added {added} supplemental server(s)"),
         }
-    } else {
-        tracing::warn!(
-            "overlay {} not found; using IANA bootstrap only",
-            cli.overlay.display()
-        );
     }
+    let overlay_publication = overlay
+        .as_ref()
+        .and_then(|overlay| overlay.publication())
+        .map(str::to_owned);
 
     if let Some(path) = cli.emit_bootstrap.as_deref() {
         let document = directory.to_bootstrap_json(overlay_publication.as_deref())?;
@@ -120,6 +135,126 @@ async fn main() -> Result<()> {
             eprintln!("RDAP query failed: {error}");
             std::process::exit(2);
         }
+    }
+
+    Ok(())
+}
+
+/// Load the supplemental overlay, or `None` when the file is absent.
+fn load_overlay(cli: &Cli) -> Result<Option<Overlay>> {
+    if !cli.overlay.exists() {
+        tracing::warn!(
+            "overlay {} not found; using IANA bootstrap only",
+            cli.overlay.display()
+        );
+        return Ok(None);
+    }
+    let raw = std::fs::read_to_string(&cli.overlay)
+        .with_context(|| format!("reading overlay {}", cli.overlay.display()))?;
+    let overlay = serde_json::from_str(&raw)
+        .with_context(|| format!("parsing overlay {}", cli.overlay.display()))?;
+    Ok(Some(overlay))
+}
+
+/// Load the TLD classification index from `path`, or the embedded copy.
+fn load_index(path: Option<&Path>) -> Result<TldIndex> {
+    match path {
+        Some(path) => {
+            let raw = std::fs::read_to_string(path)
+                .with_context(|| format!("reading TLD index {}", path.display()))?;
+            TldIndex::from_json(&raw)
+                .with_context(|| format!("parsing TLD index {}", path.display()))
+        }
+        None => Ok(TldIndex::embedded()),
+    }
+}
+
+/// Print how many delegated ccTLDs have RDAP routing, and which still don't.
+fn report_coverage(
+    iana: &ServerDirectory,
+    overlay: Option<&Overlay>,
+    index: &TldIndex,
+    as_json: bool,
+) -> Result<()> {
+    let overlay_tlds: HashSet<String> = overlay
+        .into_iter()
+        .flat_map(|overlay| overlay.servers.iter())
+        .map(|entry| {
+            entry
+                .tld
+                .trim()
+                .trim_start_matches('.')
+                .to_ascii_lowercase()
+        })
+        .collect();
+
+    let mut delegated_tlds = 0;
+    let mut cctlds = Vec::new();
+    for tld in index.tlds() {
+        if index.is_delegated(&tld) {
+            delegated_tlds += 1;
+            if index.is_cctld(&tld) {
+                cctlds.push(tld);
+            }
+        }
+    }
+
+    let (mut via_iana, mut via_overlay) = (0, 0);
+    let mut missing = Vec::new();
+    for tld in &cctlds {
+        if iana.contains(tld) {
+            via_iana += 1;
+        } else if overlay_tlds.contains(tld) {
+            via_overlay += 1;
+        } else {
+            missing.push(tld.clone());
+        }
+    }
+
+    let overlay_entries = overlay.map_or(0, |overlay| overlay.servers.len());
+    let overlay_is_clean = overlay.is_none_or(|overlay| {
+        overlay
+            .servers
+            .iter()
+            .all(|entry| index.is_cctld(&entry.tld) && index.is_delegated(&entry.tld))
+    });
+
+    if as_json {
+        let document = serde_json::json!({
+            "publication": index.publication(),
+            "delegated_tlds": delegated_tlds,
+            "delegated_cctlds": cctlds.len(),
+            "cctld_with_rdap": via_iana + via_overlay,
+            "via_iana": via_iana,
+            "via_overlay": via_overlay,
+            "without_rdap": missing.len(),
+            "missing": missing,
+            "overlay_entries": overlay_entries,
+            "overlay_all_delegated_cctld": overlay_is_clean,
+        });
+        println!("{}", serde_json::to_string_pretty(&document)?);
+        return Ok(());
+    }
+
+    println!(
+        "RDAP coverage (index published {})",
+        index.publication().unwrap_or("unknown")
+    );
+    println!();
+    println!("delegated TLDs:   {delegated_tlds}");
+    println!("delegated ccTLDs: {}", cctlds.len());
+    println!("  via IANA:       {via_iana}");
+    println!("  via overlay:    {via_overlay}");
+    println!("  no RDAP:        {}", missing.len());
+    println!();
+    println!(
+        "overlay: {overlay_entries} entries, all delegated ccTLDs: {}",
+        if overlay_is_clean { "yes" } else { "NO" }
+    );
+    if !missing.is_empty() {
+        println!();
+        println!("ccTLDs without a known RDAP server ({}):", missing.len());
+        println!("{}", missing.join(" "));
     }
 
     Ok(())

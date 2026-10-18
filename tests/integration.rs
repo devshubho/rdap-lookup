@@ -1,6 +1,6 @@
 //! Integration tests over the shipped overlay and the resolve/merge pipeline.
 
-use rdap_lookup::{Overlay, ServerDirectory, resolve_tld, to_ascii};
+use rdap_lookup::{Overlay, ServerDirectory, TldIndex, resolve_tld, to_ascii};
 
 const OVERLAY: &str = include_str!("../data/rdap-servers.json");
 
@@ -63,6 +63,24 @@ fn resolves_cc_tld_from_overlay() {
 #[test]
 fn idn_domains_are_punycoded() {
     assert_eq!(to_ascii("пример.рф").unwrap(), "xn--e1afmkfd.xn--p1ai");
+}
+
+#[test]
+fn overlay_entries_are_delegated_cctlds() {
+    let index = TldIndex::embedded();
+    let overlay: Overlay = serde_json::from_str(OVERLAY).unwrap();
+    for entry in &overlay.servers {
+        assert!(index.is_cctld(&entry.tld), "{} is a ccTLD", entry.tld);
+        assert!(index.is_delegated(&entry.tld), "{} is delegated", entry.tld);
+    }
+}
+
+#[test]
+fn idn_helpers_round_trip() {
+    assert!(rdap_lookup::is_idn("xn--p1ai"));
+    assert!(!rdap_lookup::is_idn("com"));
+    assert_eq!(rdap_lookup::to_unicode("xn--p1ai").as_deref(), Some("рф"));
+    assert_eq!(rdap_lookup::to_unicode("com"), None);
 }
 
 #[test]

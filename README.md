@@ -18,6 +18,10 @@ rdap-lookup example.com
 
 # Resolve the server only
 rdap-lookup --server-only nic.ch
+
+# Show delegated-ccTLD RDAP coverage and the remaining gaps
+rdap-lookup --coverage
+rdap-lookup --coverage --json   # machine-readable
 ```
 
 As a library:
@@ -69,6 +73,15 @@ last confirmed (`date_updated`): usually an official page, sometimes a
 best-effort guess. Because ccTLD URLs move, a
 [scheduled check](.github/workflows/monitor-cctld-rdap.yaml) probes the servers
 we list so stale entries surface early.
+
+### Coverage
+
+`rdap-lookup --coverage` joins a generated classification index
+(`data/tlds.json`, derived from IANA's Root DB and the root-zone TLD list) with
+the bootstrap and overlay. It reports how many delegated ccTLDs have RDAP
+routing — via IANA or via our overlay — and lists the ones that still don't,
+which is the work queue for new overlay entries. `--tlds <PATH>` overrides the
+embedded index.
 
 ## The data
 
