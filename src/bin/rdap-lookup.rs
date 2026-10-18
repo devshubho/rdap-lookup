@@ -94,13 +94,12 @@ async fn main() -> Result<()> {
     let mut overlay_publication: Option<String> = None;
     for overlay in &overlays {
         added += directory.merge_overlay(overlay);
-        if let Some(publication) = overlay.publication() {
-            if overlay_publication
+        if let Some(publication) = overlay.publication()
+            && overlay_publication
                 .as_deref()
                 .is_none_or(|current| publication > current)
-            {
-                overlay_publication = Some(publication.to_owned());
-            }
+        {
+            overlay_publication = Some(publication.to_owned());
         }
     }
     if added > 0 {

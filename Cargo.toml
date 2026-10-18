@@ -2,7 +2,7 @@
 name = "rdap-lookup"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 description = "Curated RDAP server directory and client: IANA's bootstrap plus hand-maintained ccTLD servers, resolved from one stable URL."
 license = "MIT"
 repository = "https://github.com/devshubho/rdap-server"

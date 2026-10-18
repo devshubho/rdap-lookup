@@ -23,3 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Zone Database and root zone TLD list, replacing the previous third-party
   source. Overlay entries now carry their own `evidence`; the 19 ccTLD servers
   were located and probed independently.
+
+### Security
+
+- Upgraded `time` to 0.3.47 to fix a stack-exhaustion advisory; this raises the
+  minimum supported Rust version to 1.88.
