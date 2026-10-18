@@ -1,9 +1,17 @@
 {
   "version": "2",
-  "publication": "2026-10-18T15:48:14Z",
+  "publication": "2026-10-18T19:35:50Z",
   "description": "Supplemental RDAP servers for IDN ccTLDs, keyed by A-label (xn--). Split from cctld-rdap-servers.json so the ASCII and Punycode namespaces stay separately reviewable. Each entry is independently probed by this project (see evidence) and re-checked by the monitor workflow. IANA always wins: an entry here is used only when IANA does not already cover the IDN TLD. Maintained independently by rdapserver.org; not affiliated with or endorsed by IANA.",
   "sources": {
     "iana_bootstrap": "https://data.iana.org/rdap/dns.json"
   },
-  "servers": []
+  "servers": [
+    {
+      "tld": "xn--3e0b707e",
+      "rdap_server": "https://rdap.nic.or.kr/",
+      "backend_operator": "KRNIC (KISA)",
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.nic.or.kr/domain/korea.xn--3e0b707e -> 200 application/rdap+json (ldhName korea.xn--3e0b707e, unicodeName korea.한국)"
+    }
+  ]
 }

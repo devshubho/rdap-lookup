@@ -22,10 +22,14 @@ merged, so the split is organisational only.
    ```
    `source` is an optional official reference; `evidence` records the
    observation that confirmed the server.
-2. The server must answer `GET {rdap_server}domain/nic.{tld}` with HTTP 200,
+2. The server must answer `GET {rdap_server}domain/<name>.{tld}` with HTTP 200,
    `content-type: application/rdap+json`, and `$.objectClassName == "domain"`.
-   Paste that result into `evidence` and set `date_updated` to the day you
-   checked it.
+   Use `nic.{tld}` when that name is registered. An IDN A-label (e.g.
+   `xn--3e0b707e`) often has no `nic.<tld>` record, so probe any name you know
+   is registered in that TLD and record the exact URL you used — for example
+   `GET https://rdap.nic.or.kr/domain/korea.xn--3e0b707e -> 200
+   application/rdap+json`. Paste that result into `evidence` and set
+   `date_updated` to the day you checked it.
 3. Bump the top-level `publication` timestamp to the current UTC time
    (`YYYY-MM-DDTHH:MM:SSZ`).
 4. IANA always wins. Overlay entries are used only for TLDs IANA's bootstrap
