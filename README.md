@@ -54,7 +54,7 @@ rdap-lookup --emit-bootstrap dns.json
 ```
 
 The merged directory is published at
-<https://about.rdapserver.org/dns.json>, so an RDAP client only needs one URL.
+<https://data.rdapserver.org/dns.json>, so an RDAP client only needs one URL.
 TLDs sharing a server are grouped, and IANA entries always win.
 
 ## The data
