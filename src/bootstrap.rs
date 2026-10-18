@@ -9,9 +9,10 @@
 //!
 //! [RFC 7484]: https://datatracker.ietf.org/doc/html/rfc7484
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use serde::Deserialize;
+use serde_json::{Value, json};
 use url::Url;
 
 use crate::error::Result;
@@ -154,6 +155,42 @@ impl ServerDirectory {
     pub fn is_empty(&self) -> bool {
         self.map.is_empty()
     }
+
+    /// Render the merged directory as an RFC 7484 bootstrap document.
+    ///
+    /// The output uses IANA's own schema (`services` of `[tlds, servers]`
+    /// pairs), so the merged directory can be served at a single stable URL and
+    /// consumed by any RDAP client as a drop-in bootstrap replacement. TLDs
+    /// that share an identical server list are grouped together.
+    ///
+    /// `publication` overrides the timestamp; when `None`, the directory's IANA
+    /// publication timestamp is reused.
+    pub fn to_bootstrap_json(&self, publication: Option<&str>) -> Result<String> {
+        let mut groups: BTreeMap<Vec<String>, Vec<String>> = BTreeMap::new();
+        for (tld, servers) in &self.map {
+            let key: Vec<String> = servers.iter().map(|s| s.as_str().to_owned()).collect();
+            groups.entry(key).or_default().push(tld.clone());
+        }
+
+        let mut services: Vec<Value> = Vec::new();
+        for (servers, mut tlds) in groups {
+            tlds.sort();
+            services.push(json!([tlds, servers]));
+        }
+
+        let mut document = json!({
+            "version": "1.0",
+            "description": "RDAP bootstrap for the DNS: IANA's canonical file merged \
+                with supplemental ccTLD servers published by rdapserver.org. \
+                IANA entries take precedence.",
+            "services": services,
+        });
+        if let Some(publication) = publication.or(self.publication.as_deref()) {
+            document["publication"] = json!(publication);
+        }
+
+        Ok(serde_json::to_string_pretty(&document)?)
+    }
 }
 
 /// Lowercase a TLD and strip a leading dot, mirroring IANA's `.com` style.
@@ -236,6 +273,43 @@ mod tests {
         assert_eq!(
             directory.servers_for("NET").unwrap()[0].as_str(),
             "https://rdap.example/gtld"
+        );
+    }
+
+    #[test]
+    fn renders_merged_rfc7484_bootstrap() {
+        let mut directory = ServerDirectory::from_iana(IANA).unwrap();
+        let overlay = Overlay {
+            publication: Some("2026-02-02T00:00:00Z".into()),
+            servers: vec![OverlayEntry {
+                tld: "io".into(),
+                rdap_server: "https://rdap.nic.io/".into(),
+                backend_operator: None,
+                date_updated: None,
+                source: None,
+            }],
+        };
+        directory.merge_overlay(&overlay);
+
+        let json = directory.to_bootstrap_json(overlay.publication()).unwrap();
+        let value: Value = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(value["publication"], "2026-02-02T00:00:00Z");
+        let services = value["services"].as_array().unwrap();
+        let has = |tld: &str, url: &str| {
+            services.iter().any(|service| {
+                service[0].as_array().unwrap().iter().any(|t| t == tld)
+                    && service[1].as_array().unwrap().iter().any(|s| s == url)
+            })
+        };
+        assert!(has("com", "https://rdap.example/gtld"), "IANA entry kept");
+        assert!(has("io", "https://rdap.nic.io/"), "overlay entry merged");
+
+        let reparsed = ServerDirectory::from_iana(&json).unwrap();
+        assert_eq!(reparsed.len(), directory.len());
+        assert_eq!(
+            reparsed.servers_for("io").unwrap()[0].as_str(),
+            "https://rdap.nic.io/"
         );
     }
 }

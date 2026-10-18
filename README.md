@@ -43,6 +43,20 @@ let record = RdapClient::new().lookup(server, &domain).await?;
 # }
 ```
 
+## Publish one stable URL
+
+Merge IANA's bootstrap with the overlay into a single RFC 7484 file and serve it
+from anywhere:
+
+```sh
+# Write the merged directory to a file (`-` prints to stdout)
+rdap-lookup --emit-bootstrap dns.json
+```
+
+The merged directory is published at
+<https://about.rdapserver.org/dns.json>, so an RDAP client only needs one URL.
+TLDs sharing a server are grouped, and IANA entries always win.
+
 ## The data
 
 | File | Purpose |

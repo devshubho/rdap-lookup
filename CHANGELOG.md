@@ -12,3 +12,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   IDN-to-A-label resolution, and an RDAP domain client.
 - `rdap-lookup` CLI for resolving a domain to its RDAP server and querying it.
 - On-disk `ETag` / `Last-Modified` bootstrap cache.
+- `--emit-bootstrap <PATH>` and `ServerDirectory::to_bootstrap_json` to export
+  the merged directory as a single RFC 7484 bootstrap file.

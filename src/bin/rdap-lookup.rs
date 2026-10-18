@@ -1,7 +1,7 @@
 //! `rdap-lookup` CLI: resolve a domain to its RDAP server and (optionally)
 //! fetch its RDAP record.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -15,7 +15,7 @@ use tracing_subscriber::EnvFilter;
 #[command(name = "rdap-lookup", version, about, long_about = None)]
 struct Cli {
     /// Domain to look up, e.g. `example.com` or `nic.ch`.
-    domain: String,
+    domain: Option<String>,
 
     /// Supplemental ccTLD overlay JSON.
     #[arg(long, default_value = "data/rdap-servers.json")]
@@ -32,6 +32,11 @@ struct Cli {
     /// Print the RDAP server URL without querying it.
     #[arg(long)]
     server_only: bool,
+
+    /// Merge IANA + overlay and write a single RFC 7484 bootstrap JSON to
+    /// PATH (use `-` for stdout) instead of looking up a domain.
+    #[arg(long, value_name = "PATH")]
+    emit_bootstrap: Option<PathBuf>,
 }
 
 fn default_cache_dir() -> PathBuf {
@@ -54,11 +59,13 @@ async fn main() -> Result<()> {
         .context("fetching IANA RDAP bootstrap")?;
     let mut directory = ServerDirectory::from_iana(&iana).context("parsing IANA RDAP bootstrap")?;
 
+    let mut overlay_publication: Option<String> = None;
     if cli.overlay.exists() {
         let raw = std::fs::read_to_string(&cli.overlay)
             .with_context(|| format!("reading overlay {}", cli.overlay.display()))?;
         let overlay: Overlay = serde_json::from_str(&raw)
             .with_context(|| format!("parsing overlay {}", cli.overlay.display()))?;
+        overlay_publication = overlay.publication().map(str::to_owned);
         let added = directory.merge_overlay(&overlay);
         match overlay.publication() {
             Some(publication) => {
@@ -73,8 +80,28 @@ async fn main() -> Result<()> {
         );
     }
 
-    let tld = resolve_tld(&cli.domain)?;
-    let domain = to_ascii(&cli.domain)?;
+    if let Some(path) = cli.emit_bootstrap.as_deref() {
+        let document = directory.to_bootstrap_json(overlay_publication.as_deref())?;
+        if path == Path::new("-") {
+            print!("{document}");
+        } else {
+            std::fs::write(path, document)
+                .with_context(|| format!("writing merged bootstrap to {}", path.display()))?;
+            tracing::info!(
+                "wrote {len} TLDs to {path}",
+                len = directory.len(),
+                path = path.display()
+            );
+        }
+        return Ok(());
+    }
+
+    let domain_arg = cli
+        .domain
+        .as_deref()
+        .context("a DOMAIN is required unless --emit-bootstrap is used")?;
+    let tld = resolve_tld(domain_arg)?;
+    let domain = to_ascii(domain_arg)?;
     let server = directory
         .servers_for(&tld)
         .and_then(|servers| servers.first())
