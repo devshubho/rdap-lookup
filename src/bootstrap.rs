@@ -180,9 +180,11 @@ impl ServerDirectory {
 
         let mut document = json!({
             "version": "1.0",
-            "description": "RDAP bootstrap for the DNS: IANA's canonical file merged \
-                with supplemental ccTLD servers published by rdapserver.org. \
-                IANA entries take precedence.",
+            "description": "RDAP bootstrap for the Domain Name System. Independently \
+                published by rdapserver.org: IANA's canonical RFC 7484 bootstrap \
+                merged with supplemental ccTLD RDAP servers for TLDs IANA omits. \
+                IANA entries always take precedence. Not affiliated with or \
+                endorsed by IANA.",
             "services": services,
         });
         if let Some(publication) = publication.or(self.publication.as_deref()) {
