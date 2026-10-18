@@ -1,6 +1,6 @@
 {
   "description": "RDAP bootstrap for the Domain Name System. Maintained independently by rdapserver.org; not affiliated with or endorsed by IANA. IANA's canonical RFC 7484 bootstrap merged with supplemental ccTLD RDAP servers for TLDs IANA omits. IANA entries always take precedence.",
-  "publication": "2026-10-18T19:42:26Z",
+  "publication": "2026-10-18T19:56:45Z",
   "services": [
     [
       [
@@ -4052,6 +4052,7 @@
     [
       [
         "in",
+        "xn--45brj9c",
         "xn--h2brj9c"
       ],
       [
