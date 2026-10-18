@@ -34,8 +34,13 @@ let cache = Cache::new(std::env::temp_dir().join("rdap-lookup"));
 let iana = cache.get_or_fetch(IANA_BOOTSTRAP_URL).await?;
 
 let mut directory = ServerDirectory::from_iana(&iana)?;
-let overlay: Overlay = serde_json::from_str(include_str!("data/rdap-cctld-servers.json"))?;
-directory.merge_overlay(&overlay);
+for source in [
+    include_str!("data/manual/cctld-rdap-servers.json"),
+    include_str!("data/manual/punycode-rdap-servers.json"),
+] {
+    let overlay: Overlay = serde_json::from_str(source)?;
+    directory.merge_overlay(&overlay);
+}
 
 let tld = rdap_lookup::resolve_tld("пример.рф")?;    // "xn--p1ai"
 let domain = rdap_lookup::to_ascii("пример.рф")?;    // "xn--e1afmkfd.xn--p1ai"
@@ -59,9 +64,10 @@ rdap-lookup --emit-bootstrap dns.json
 
 The merged directory is published at
 <https://data.rdapserver.org/dns.json>, so an RDAP client only needs one URL.
-The raw overlay is published alongside it at
-<https://data.rdapserver.org/rdap-cctld-servers.json>. TLDs sharing a server are
-grouped, and IANA entries always win.
+The raw overlays are published alongside it as
+<https://data.rdapserver.org/rdap-cctld-servers.json> (ASCII ccTLDs) and
+<https://data.rdapserver.org/punycode-rdap-servers.json> (IDN A-labels). TLDs
+sharing a server are grouped, and IANA entries always win.
 
 ## ccTLD RDAP servers
 
@@ -102,6 +108,7 @@ data/
 | `data/official/iana-root-zone-tlds.txt` | official | Root zone TLD list (delegation). |
 | `data/official/iana-root-zone-db.html.gz` | official | Root Zone Database (TLD type). |
 | `data/manual/cctld-rdap-servers.json` | manual | Supplemental ccTLD RDAP servers IANA omits. |
+| `data/manual/punycode-rdap-servers.json` | manual | The same, for IDN ccTLDs (`xn--` A-labels). |
 | `data/generated/tlds.json` | generated | TLD classification (`cctld`/`gtld`/`infrastructure` + `delegated`). |
 | `data/generated/dns.json` | generated | Merged RFC 7484 bootstrap; copied verbatim to `site/dns.json`. |
 
@@ -130,6 +137,7 @@ rdap-lookup --iana data/official/iana-rdap-bootstrap.json \
     --emit-bootstrap data/generated/dns.json
 cp data/generated/dns.json site/dns.json
 cp data/manual/cctld-rdap-servers.json site/rdap-cctld-servers.json
+cp data/manual/punycode-rdap-servers.json site/punycode-rdap-servers.json
 ```
 
 ## License

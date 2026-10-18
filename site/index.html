@@ -83,8 +83,8 @@
         <p>
           Build it with
           <code>cargo install --git https://github.com/devshubho/rdap-server</code>.
-          The ccTLD overlay ships as <code>data/manual/cctld-rdap-servers.json</code>, so run
-          from a checkout or pass <code>--overlay</code> to point at it.
+          The overlays ship in <code>data/manual/</code> (every <code>*.json</code> there is merged),
+          so run from a checkout or pass <code>--manual-dir</code> to point at them.
         </p>
         <pre class="terminal"><code><span class="prompt">$</span> rdap-lookup example.com
 example.com&#9;.com&#9;https://rdap.verisign.com/com/v1/
@@ -118,6 +118,7 @@ nic.ch&#9;.ch&#9;https://rdap.nic.ch/</code></pre>
             <li><a href="https://data.rdapserver.org/dns.json">Merged bootstrap (IANA + overlay)</a></li>
             <li><a href="https://data.iana.org/rdap/dns.json">IANA RDAP bootstrap (dns.json)</a></li>
             <li><a href="https://data.rdapserver.org/rdap-cctld-servers.json">Supplemental ccTLD overlay</a></li>
+            <li><a href="https://data.rdapserver.org/punycode-rdap-servers.json">Supplemental IDN (Punycode) overlay</a></li>
             <li><a href="https://github.com/devshubho/rdap-server">Source on GitHub</a></li>
           </ul>
         </section>

@@ -12,6 +12,7 @@ This tool fetches a JSON bootstrap file over HTTPS and issues RDAP queries to
 third-party servers. Note that RDAP responses are untrusted input and are
 returned to callers as JSON; validate before acting on them.
 
-The supplemental overlay is data, not code, but a malicious entry could point a
-TLD at an attacker-controlled server. Changes to `data/manual/cctld-rdap-servers.json` are
-reviewed and must cite a source.
+The supplemental overlays are data, not code, but a malicious entry could point
+a TLD at an attacker-controlled server. Changes to
+`data/manual/cctld-rdap-servers.json` and `data/manual/punycode-rdap-servers.json`
+are reviewed and must cite a source.

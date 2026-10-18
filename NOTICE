@@ -15,10 +15,12 @@ This product includes data derived from the following sources:
   data/generated/tlds.json is generated from these by scripts/gen-tlds.py.
   IANA does not endorse this project.
 
-The RDAP servers in data/manual/cctld-rdap-servers.json were independently located and
-probed by this project; each entry carries its own evidence. iana-data
+The RDAP servers in data/manual/cctld-rdap-servers.json and
+data/manual/punycode-rdap-servers.json were independently located and probed by
+this project; each entry carries its own evidence. iana-data
 (https://github.com/devshubho/iana-data) served as inspiration only and is not a
 data source.
 
-The supplemental ccTLD entries in data/manual/cctld-rdap-servers.json are contributed under
-CC0-1.0; the software is licensed under MIT (see LICENSE).
+The supplemental entries in data/manual/cctld-rdap-servers.json and
+data/manual/punycode-rdap-servers.json are contributed under CC0-1.0; the
+software is licensed under MIT (see LICENSE).

@@ -4,7 +4,10 @@ Thanks for helping keep RDAP coverage complete.
 
 ## Adding or fixing a ccTLD RDAP server
 
-The most useful contribution is a correction to `data/manual/cctld-rdap-servers.json`.
+The most useful contribution is a correction to the overlay. Put ASCII ccTLDs in
+`data/manual/cctld-rdap-servers.json` and IDN ccTLDs (A-labels, `xn--…`) in
+`data/manual/punycode-rdap-servers.json`. Every `*.json` in `data/manual/` is
+merged, so the split is organisational only.
 
 1. Add or edit an entry:
    ```json
@@ -31,6 +34,7 @@ The most useful contribution is a correction to `data/manual/cctld-rdap-servers.
 
    ```sh
    cp data/manual/cctld-rdap-servers.json site/rdap-cctld-servers.json
+   cp data/manual/punycode-rdap-servers.json site/punycode-rdap-servers.json
    rdap-lookup --iana data/official/iana-rdap-bootstrap.json \
        --emit-bootstrap data/generated/dns.json
    cp data/generated/dns.json site/dns.json

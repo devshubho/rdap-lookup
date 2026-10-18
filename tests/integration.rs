@@ -3,6 +3,7 @@
 use rdap_lookup::{Overlay, ServerDirectory, TldIndex, resolve_tld, to_ascii};
 
 const OVERLAY: &str = include_str!("../data/manual/cctld-rdap-servers.json");
+const PUNYCODE_OVERLAY: &str = include_str!("../data/manual/punycode-rdap-servers.json");
 
 const IANA: &str = r#"{
     "publication": "2026-01-01T00:00:00Z",
@@ -75,6 +76,27 @@ fn published_overlay_matches_source() {
 }
 
 #[test]
+fn published_punycode_overlay_matches_source() {
+    const PUBLISHED: &str = include_str!("../site/punycode-rdap-servers.json");
+    assert_eq!(
+        PUBLISHED, PUNYCODE_OVERLAY,
+        "site/punycode-rdap-servers.json must stay byte-identical to data/manual/punycode-rdap-servers.json"
+    );
+}
+
+#[test]
+fn punycode_overlay_holds_only_alabels() {
+    let overlay: Overlay = serde_json::from_str(PUNYCODE_OVERLAY).expect("punycode overlay parses");
+    for entry in &overlay.servers {
+        assert!(
+            entry.tld.starts_with("xn--"),
+            "punycode overlay entry must be an A-label, got {}",
+            entry.tld
+        );
+    }
+}
+
+#[test]
 fn published_bootstrap_matches_generated() {
     const GENERATED: &str = include_str!("../data/generated/dns.json");
     const PUBLISHED: &str = include_str!("../site/dns.json");
@@ -88,13 +110,15 @@ fn published_bootstrap_matches_generated() {
 fn published_bootstrap_includes_overlay() {
     const PUBLISHED: &str = include_str!("../site/dns.json");
     let directory = ServerDirectory::from_iana(PUBLISHED).expect("site/dns.json parses");
-    let overlay: Overlay = serde_json::from_str(OVERLAY).unwrap();
-    for entry in &overlay.servers {
-        assert!(
-            directory.contains(&entry.tld),
-            "site/dns.json should route .{}",
-            entry.tld
-        );
+    for source in [OVERLAY, PUNYCODE_OVERLAY] {
+        let overlay: Overlay = serde_json::from_str(source).unwrap();
+        for entry in &overlay.servers {
+            assert!(
+                directory.contains(&entry.tld),
+                "site/dns.json should route .{}",
+                entry.tld
+            );
+        }
     }
 }
 

@@ -19,9 +19,10 @@ struct Cli {
     /// Domain to look up, e.g. `example.com` or `nic.ch`.
     domain: Option<String>,
 
-    /// Supplemental ccTLD overlay JSON.
-    #[arg(long, default_value = "data/manual/cctld-rdap-servers.json")]
-    overlay: PathBuf,
+    /// Directory of supplemental overlay JSON files; every `*.json` is merged
+    /// (in filename order). IANA always wins over any overlay entry.
+    #[arg(long, default_value = "data/manual")]
+    manual_dir: PathBuf,
 
     /// Directory for the cached IANA bootstrap.
     #[arg(long, env = "RDAP_LOOKUP_CACHE")]
@@ -81,27 +82,33 @@ async fn main() -> Result<()> {
     };
     let mut directory = ServerDirectory::from_iana(&iana).context("parsing IANA RDAP bootstrap")?;
 
-    let overlay = load_overlay(&cli)?;
+    let overlays = load_overlays(&cli)?;
 
     if cli.coverage {
         let index = load_index(cli.tlds.as_deref())?;
-        report_coverage(&directory, overlay.as_ref(), &index, cli.json)?;
+        report_coverage(&directory, &overlays, &index, cli.json)?;
         return Ok(());
     }
 
-    if let Some(overlay) = &overlay {
-        let added = directory.merge_overlay(overlay);
-        match overlay.publication() {
-            Some(publication) => {
-                tracing::info!("overlay published {publication}; added {added} server(s)")
+    let mut added = 0usize;
+    let mut overlay_publication: Option<String> = None;
+    for overlay in &overlays {
+        added += directory.merge_overlay(overlay);
+        if let Some(publication) = overlay.publication() {
+            if overlay_publication
+                .as_deref()
+                .is_none_or(|current| publication > current)
+            {
+                overlay_publication = Some(publication.to_owned());
             }
-            None => tracing::info!("overlay added {added} supplemental server(s)"),
         }
     }
-    let overlay_publication = overlay
-        .as_ref()
-        .and_then(|overlay| overlay.publication())
-        .map(str::to_owned);
+    if added > 0 {
+        tracing::info!(
+            "merged {added} supplemental server(s) from {} overlay file(s)",
+            overlays.len()
+        );
+    }
 
     if let Some(path) = cli.emit_bootstrap.as_deref() {
         let document = directory.to_bootstrap_json(overlay_publication.as_deref())?;
@@ -148,20 +155,38 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-/// Load the supplemental overlay, or `None` when the file is absent.
-fn load_overlay(cli: &Cli) -> Result<Option<Overlay>> {
-    if !cli.overlay.exists() {
+/// Load every `*.json` overlay in the manual directory, sorted by filename so
+/// merging is deterministic.
+fn load_overlays(cli: &Cli) -> Result<Vec<Overlay>> {
+    let dir = &cli.manual_dir;
+    if !dir.is_dir() {
         tracing::warn!(
-            "overlay {} not found; using IANA bootstrap only",
-            cli.overlay.display()
+            "overlay directory {} not found; using IANA bootstrap only",
+            dir.display()
         );
-        return Ok(None);
+        return Ok(Vec::new());
     }
-    let raw = std::fs::read_to_string(&cli.overlay)
-        .with_context(|| format!("reading overlay {}", cli.overlay.display()))?;
-    let overlay = serde_json::from_str(&raw)
-        .with_context(|| format!("parsing overlay {}", cli.overlay.display()))?;
-    Ok(Some(overlay))
+
+    let mut paths: Vec<PathBuf> = std::fs::read_dir(dir)
+        .with_context(|| format!("reading overlay directory {}", dir.display()))?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| {
+            path.extension()
+                .is_some_and(|ext| ext.eq_ignore_ascii_case("json"))
+        })
+        .collect();
+    paths.sort();
+
+    let mut overlays = Vec::with_capacity(paths.len());
+    for path in paths {
+        let raw = std::fs::read_to_string(&path)
+            .with_context(|| format!("reading overlay {}", path.display()))?;
+        let overlay = serde_json::from_str(&raw)
+            .with_context(|| format!("parsing overlay {}", path.display()))?;
+        overlays.push(overlay);
+    }
+    Ok(overlays)
 }
 
 /// Load the TLD classification index from `path`, or the embedded copy.
@@ -180,12 +205,12 @@ fn load_index(path: Option<&Path>) -> Result<TldIndex> {
 /// Print how many delegated ccTLDs have RDAP routing, and which still don't.
 fn report_coverage(
     iana: &ServerDirectory,
-    overlay: Option<&Overlay>,
+    overlays: &[Overlay],
     index: &TldIndex,
     as_json: bool,
 ) -> Result<()> {
-    let overlay_tlds: HashSet<String> = overlay
-        .into_iter()
+    let overlay_tlds: HashSet<String> = overlays
+        .iter()
         .flat_map(|overlay| overlay.servers.iter())
         .map(|entry| {
             entry
@@ -219,8 +244,8 @@ fn report_coverage(
         }
     }
 
-    let overlay_entries = overlay.map_or(0, |overlay| overlay.servers.len());
-    let overlay_is_clean = overlay.is_none_or(|overlay| {
+    let overlay_entries: usize = overlays.iter().map(|overlay| overlay.servers.len()).sum();
+    let overlay_is_clean = overlays.iter().all(|overlay| {
         overlay
             .servers
             .iter()

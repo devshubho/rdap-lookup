@@ -26,6 +26,10 @@ rewrites `manifest.json` (source URL, sha256, fetched-at).
 | File | Purpose |
 | --- | --- |
 | `cctld-rdap-servers.json` | The hand-maintained ccTLD overlay (a delta; IANA always wins). |
+| `punycode-rdap-servers.json` | The same overlay for IDN ccTLDs, keyed by A-label (`xn--`). |
+
+Every `*.json` in this directory is merged (in filename order), so a new file
+here is picked up with no code change.
 
 See [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -42,6 +46,7 @@ inputs is byte-for-byte reproducible.
 
 ## Publishing
 
-`site/dns.json` and `site/rdap-cctld-servers.json` are verbatim copies of
-`generated/dns.json` and `manual/cctld-rdap-servers.json`. Tests fail when they
-drift, so always copy after regenerating.
+`site/dns.json`, `site/rdap-cctld-servers.json`, and `site/punycode-rdap-servers.json`
+are verbatim copies of `generated/dns.json`, `manual/cctld-rdap-servers.json`, and
+`manual/punycode-rdap-servers.json`. Tests fail when they drift, so always copy
+after regenerating.

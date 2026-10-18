@@ -42,11 +42,11 @@ jobs:
         run: |
           cargo run --quiet -- \
             --iana data/official/iana-rdap-bootstrap.json \
-            --overlay data/manual/cctld-rdap-servers.json \
             --emit-bootstrap data/generated/dns.json
       - name: Publish copies
         run: |
           cp data/generated/dns.json site/dns.json
           cp data/manual/cctld-rdap-servers.json site/rdap-cctld-servers.json
+          cp data/manual/punycode-rdap-servers.json site/punycode-rdap-servers.json
       - name: Fail if generated data is stale
         run: git diff --exit-code
