@@ -66,6 +66,29 @@ fn idn_domains_are_punycoded() {
 }
 
 #[test]
+fn published_overlay_matches_source() {
+    const PUBLISHED: &str = include_str!("../site/rdap-servers.json");
+    assert_eq!(
+        PUBLISHED, OVERLAY,
+        "site/rdap-servers.json must stay byte-identical to data/rdap-servers.json"
+    );
+}
+
+#[test]
+fn published_bootstrap_includes_overlay() {
+    const PUBLISHED: &str = include_str!("../site/dns.json");
+    let directory = ServerDirectory::from_iana(PUBLISHED).expect("site/dns.json parses");
+    let overlay: Overlay = serde_json::from_str(OVERLAY).unwrap();
+    for entry in &overlay.servers {
+        assert!(
+            directory.contains(&entry.tld),
+            "site/dns.json should route .{}",
+            entry.tld
+        );
+    }
+}
+
+#[test]
 fn overlay_entries_are_delegated_cctlds() {
     let index = TldIndex::embedded();
     let overlay: Overlay = serde_json::from_str(OVERLAY).unwrap();
