@@ -4,7 +4,7 @@ name: Monitor ccTLD RDAP servers
 # publish on a light schedule to surface stale entries early.
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 jobs:
