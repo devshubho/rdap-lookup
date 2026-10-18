@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>:: about.rdapserver.org :: the RDAP server directory ::</title>
+    <meta
+      name="description"
+      content="A curated RDAP server directory: IANA's bootstrap plus hand-maintained ccTLD servers, served from one stable URL."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="tiles" aria-hidden="true"></div>
+
+    <main class="page">
+      <header class="banner">
+        <h1 class="blink">RDAP SERVER DIRECTORY</h1>
+        <p class="tagline">
+          IANA's bootstrap + hand-maintained ccTLD servers &middot; one stable URL
+        </p>
+      </header>
+
+      <marquee class="ticker" behavior="scroll" direction="left" scrollamount="6">
+        WELCOME to rdapserver.org, the friendly home of the RDAP
+        server lookup. Now with the ccTLD coverage IANA leaves out. Point
+        your RDAP client at a single URL. It's SMALL DATA and it's ALL IN ONE
+        PLACE.
+      </marquee>
+
+      <hr class="rule" />
+
+      <div class="cols">
+        <section class="panel">
+          <h2>&gt; WHAT IS RDAP?</h2>
+          <p>
+            RDAP (<em>Registration Data Access Protocol</em>, RFC 7480&ndash;7484)
+            is the modern replacement for WHOIS. To look a domain up you first need
+            to know <strong>which server</strong> answers for its TLD.
+          </p>
+        </section>
+
+        <section class="panel">
+          <h2>&gt; WHAT IS THIS?</h2>
+          <p>
+            IANA publishes a canonical
+            <a href="https://data.iana.org/rdap/dns.json">bootstrap file</a>, but it
+            lists only <em>some</em> ccTLDs &mdash; each ccTLD is self-governed, so
+            most are missing. This project adds a small, hand-maintained overlay for
+            those gaps and serves both from a single URL.
+          </p>
+        </section>
+      </div>
+
+      <section class="panel wide">
+        <h2>&gt; THE RECIPE</h2>
+        <ol>
+          <li>The <strong>IANA bootstrap</strong> stays canonical for everything it covers.</li>
+          <li>The <strong>overlay</strong> is a delta: only the TLDs IANA omits.</li>
+          <li><strong>IANA always wins</strong> &mdash; when IANA adds a ccTLD itself, the overlay quietly defers.</li>
+          <li>IDNs are punycoded to their A-label (<code>xn--</code>) before lookup.</li>
+        </ol>
+      </section>
+
+      <section class="panel wide">
+        <h2>&gt; USE IT</h2>
+        <p>
+          Build it with
+          <code>cargo install --git https://github.com/devshubho/rdap-server</code>.
+          The ccTLD overlay ships as <code>data/rdap-servers.json</code>, so run
+          from a checkout or pass <code>--overlay</code> to point at it.
+        </p>
+        <pre class="terminal"><code><span class="prompt">$</span> rdap-lookup example.com
+example.com&#9;.com&#9;https://rdap.verisign.com/com/v1/
+
+<span class="prompt">$</span> rdap-lookup --server-only nic.ch
+nic.ch&#9;.ch&#9;https://rdap.nic.ch/</code></pre>
+      </section>
+
+      <hr class="rule" />
+
+      <div class="cols">
+        <section class="panel">
+          <h2>&gt; THE DATA</h2>
+          <ul class="links">
+            <li><a href="https://data.iana.org/rdap/dns.json">IANA RDAP bootstrap (dns.json)</a></li>
+            <li><a href="https://github.com/devshubho/rdap-server/blob/main/data/rdap-servers.json">Supplemental ccTLD overlay</a></li>
+            <li><a href="https://github.com/devshubho/rdap-server">Source on GitHub</a></li>
+          </ul>
+        </section>
+
+        <section class="panel">
+          <h2>&gt; NO RDAP?</h2>
+          <p>
+            Not every ccTLD runs an RDAP server. When none is known, fall back to
+            WHOIS &mdash; the full TLD dataset (from the
+            <a href="https://github.com/devshubho/iana-data">iana-data</a> project)
+            carries <code>whois_server</code> alongside <code>rdap_server</code>.
+          </p>
+        </section>
+      </div>
+
+      <footer class="footer">
+        <p class="status">*** SMALL DATA &middot; ALL IN ONE PLACE ***</p>
+        <p class="counter">
+          ccTLD servers in the overlay:
+          <span class="digits">1</span><span class="digits">9</span>
+        </p>
+        <p class="badges">
+          Hand-rolled HTML &middot; no JavaScript &middot; no tracking &middot;
+          <a href="https://github.com/devshubho/rdap-server/issues">report an issue</a>
+        </p>
+        <p class="fineprint">
+          Overlay last published <time datetime="2026-10-18">2026-10-18</time>.
+          IANA does not endorse this project. Data attribution in the
+          <a href="https://github.com/devshubho/rdap-server/blob/main/NOTICE">NOTICE</a>.
+          &copy; 2026 rdapserver.org
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
