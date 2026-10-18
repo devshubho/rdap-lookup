@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please report suspected vulnerabilities privately via GitHub's
-[Security Advisories](https://github.com/devshubho/rdap-lookup/security/advisories/new)
+[Security Advisories](https://github.com/devshubho/rdap-server/security/advisories/new)
 rather than a public issue. We aim to acknowledge reports within a few days.
 
 ## Scope
