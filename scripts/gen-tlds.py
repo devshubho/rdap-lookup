@@ -1,32 +1,38 @@
 #!/usr/bin/env python3
-"""Regenerate ``data/tlds.json`` from IANA primary sources.
+"""Regenerate ``data/generated/tlds.json`` from the vendored IANA sources.
 
 The index answers two questions the RDAP bootstrap cannot: which TLDs are
-ccTLDs, and which are actually delegated. Both facts come straight from IANA,
-so no third-party dataset is copied:
+ccTLDs, and which are actually delegated. Both facts come straight from IANA's
+snapshot in ``data/official/``:
 
-* type per TLD    -> IANA Root Zone Database   https://www.iana.org/domains/root/db
-* delegation      -> root zone TLD list        https://data.iana.org/TLD/tlds-alpha-by-domain.txt
+* type per TLD    -> Root Zone Database   ``iana-root-zone-db.html.gz``
+* delegation      -> root zone TLD list   ``iana-root-zone-tlds.txt``
 
 Only the standard library is used, so it runs anywhere without installing
-anything. Pass local paths to ``--root-db`` / ``--zone`` to work offline.
+anything. The publication timestamp is taken from the snapshot manifest, so
+regenerating from the same sources is byte-for-byte reproducible.
+
+Refresh the sources first with ``scripts/fetch-official.py``.
 
 Usage:
-    python scripts/gen-tlds.py                       # fetch from IANA
-    python scripts/gen-tlds.py --root-db page.html --zone tlds.txt -o data/tlds.json
+    python scripts/gen-tlds.py
+    python scripts/gen-tlds.py --root-db page.html --zone tlds.txt -o out.json
 """
 
 from __future__ import annotations
 
 import argparse
 import datetime as dt
+import gzip
+import json
 import re
 import sys
 import urllib.request
 
-ROOT_DB_URL = "https://www.iana.org/domains/root/db"
-ZONE_URL = "https://data.iana.org/TLD/tlds-alpha-by-domain.txt"
-OUTPUT = "data/tlds.json"
+ROOT_DB_DEFAULT = "data/official/iana-root-zone-db.html.gz"
+ZONE_DEFAULT = "data/official/iana-root-zone-tlds.txt"
+MANIFEST_DEFAULT = "data/official/manifest.json"
+OUTPUT_DEFAULT = "data/generated/tlds.json"
 
 # IANA's "Type" column -> our Kind (see src/classify.rs).
 TYPE_TO_KIND = {
@@ -46,10 +52,13 @@ WS_RE = re.compile(r"\s+")
 
 
 def read(source: str) -> str:
-    """Read a URL or a local path into text."""
+    """Read a URL, a gzipped file, or a plain file into text."""
     if source.startswith(("http://", "https://")):
         with urllib.request.urlopen(source, timeout=60) as response:
             return response.read().decode("utf-8")
+    if source.endswith(".gz"):
+        with gzip.open(source, "rb") as handle:
+            return handle.read().decode("utf-8")
     with open(source, encoding="utf-8") as handle:
         return handle.read()
 
@@ -84,6 +93,14 @@ def parse_zone(text: str) -> set[str]:
     }
 
 
+def manifest_timestamp(path: str) -> str | None:
+    try:
+        with open(path, encoding="utf-8") as handle:
+            return json.load(handle).get("fetched_at")
+    except OSError:
+        return None
+
+
 def build(kinds: dict[str, str], zone: set[str], publication: str) -> str:
     entries = [
         {"tld": tld, "type": kinds[tld], "delegated": tld in zone}
@@ -93,7 +110,7 @@ def build(kinds: dict[str, str], zone: set[str], publication: str) -> str:
         "{",
         '  "version": "1",',
         f'  "publication": "{publication}",',
-        f'  "source": "IANA Root Zone Database + root zone TLD list ({ROOT_DB_URL}, {ZONE_URL})",',
+        '  "source": "IANA Root Zone Database + root zone TLD list; see data/official/manifest.json",',
         '  "tlds": [',
     ]
     for index, entry in enumerate(entries):
@@ -109,21 +126,26 @@ def build(kinds: dict[str, str], zone: set[str], publication: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root-db", default=ROOT_DB_URL, help="Root Zone Database URL or path")
-    parser.add_argument("--zone", default=ZONE_URL, help="root zone TLD list URL or path")
-    parser.add_argument("-o", "--output", default=OUTPUT, help="output path")
+    parser.add_argument("--root-db", default=ROOT_DB_DEFAULT, help="Root Zone Database URL or path")
+    parser.add_argument("--zone", default=ZONE_DEFAULT, help="root zone TLD list URL or path")
+    parser.add_argument("--manifest", default=MANIFEST_DEFAULT, help="snapshot manifest for the publication date")
+    parser.add_argument("-o", "--output", default=OUTPUT_DEFAULT, help="output path")
     parser.add_argument("--publication", help="override the publication timestamp")
     args = parser.parse_args()
 
     kinds = parse_types(read(args.root_db))
     zone = parse_zone(read(args.zone))
-    publication = args.publication or dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    publication = (
+        args.publication
+        or manifest_timestamp(args.manifest)
+        or dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
 
     with open(args.output, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(build(kinds, zone, publication))
 
     delegated = sum(1 for kind in kinds if kind in zone)
-    cctlds = sum(1 for tld, kind in kinds.items() if kind == "cctld")
+    cctlds = sum(1 for kind, value in kinds.items() if value == "cctld")
     print(
         f"wrote {args.output}: {len(kinds)} TLDs "
         f"({cctlds} ccTLDs, {delegated} delegated, {len(kinds) - delegated} undelegated)"

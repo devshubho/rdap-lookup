@@ -1,0 +1,23 @@
+{
+  "fetched_at": "2026-10-18T16:03:58Z",
+  "sources": [
+    {
+      "path": "iana-rdap-bootstrap.json",
+      "url": "https://data.iana.org/rdap/dns.json",
+      "sha256": "e3419eb0b28dcc3a68dd3bb0e64429cb0d376c3883ca4c42317aea65fc0ab471",
+      "bytes": 71334
+    },
+    {
+      "path": "iana-root-zone-tlds.txt",
+      "url": "https://data.iana.org/TLD/tlds-alpha-by-domain.txt",
+      "sha256": "d692781e5b03b4bba965fa99b647eb12f2b8af5108a19d5e3b977165393c3b1c",
+      "bytes": 9528
+    },
+    {
+      "path": "iana-root-zone-db.html.gz",
+      "url": "https://www.iana.org/domains/root/db",
+      "sha256": "edffdf093a13fd5c3ef6ecc6f99e0ef9e3477a3a74b04cfb5450973caf42bc6b",
+      "bytes": 3842229
+    }
+  ]
+}

@@ -2,9 +2,10 @@
 //!
 //! IANA's RDAP bootstrap lists every gTLD but only *some* ccTLDs, and it never
 //! says which kind a TLD is. This module reads a small, generated index
-//! (`data/tlds.json`, derived from IANA's Root DB and the root-zone TLD list) so
-//! the project can label overlay entries and report ccTLD coverage without
-//! guessing from string length — which would misclassify IDN ccTLDs.
+//! (`data/generated/tlds.json`, derived from IANA's Root Zone Database and the
+//! root-zone TLD list) so the project can label overlay entries and report
+//! ccTLD coverage without guessing from string length — which would
+//! misclassify IDN ccTLDs.
 
 use std::collections::HashMap;
 
@@ -64,13 +65,14 @@ pub struct TldIndex {
 }
 
 impl TldIndex {
-    /// Load the index embedded in the binary (`data/tlds.json`).
+    /// Load the index embedded in the binary (`data/generated/tlds.json`).
     ///
     /// # Panics
     ///
     /// Panics if the embedded index is malformed; that is a build-time bug.
     pub fn embedded() -> Self {
-        Self::from_json(include_str!("../data/tlds.json")).expect("embedded data/tlds.json parses")
+        Self::from_json(include_str!("../data/generated/tlds.json"))
+            .expect("embedded data/generated/tlds.json parses")
     }
 
     /// Parse an index from JSON.

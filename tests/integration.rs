@@ -2,7 +2,7 @@
 
 use rdap_lookup::{Overlay, ServerDirectory, TldIndex, resolve_tld, to_ascii};
 
-const OVERLAY: &str = include_str!("../data/rdap-cctld-servers.json");
+const OVERLAY: &str = include_str!("../data/manual/cctld-rdap-servers.json");
 
 const IANA: &str = r#"{
     "publication": "2026-01-01T00:00:00Z",
@@ -70,7 +70,17 @@ fn published_overlay_matches_source() {
     const PUBLISHED: &str = include_str!("../site/rdap-cctld-servers.json");
     assert_eq!(
         PUBLISHED, OVERLAY,
-        "site/rdap-cctld-servers.json must stay byte-identical to data/rdap-cctld-servers.json"
+        "site/rdap-cctld-servers.json must stay byte-identical to data/manual/cctld-rdap-servers.json"
+    );
+}
+
+#[test]
+fn published_bootstrap_matches_generated() {
+    const GENERATED: &str = include_str!("../data/generated/dns.json");
+    const PUBLISHED: &str = include_str!("../site/dns.json");
+    assert_eq!(
+        PUBLISHED, GENERATED,
+        "site/dns.json must stay byte-identical to data/generated/dns.json"
     );
 }
 

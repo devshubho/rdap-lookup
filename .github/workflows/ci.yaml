@@ -29,3 +29,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: EmbarkStudios/cargo-deny-action@v2
+
+  data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Regenerate tlds.json
+        run: python3 scripts/gen-tlds.py
+      - name: Regenerate merged bootstrap
+        run: |
+          cargo run --quiet -- \
+            --iana data/official/iana-rdap-bootstrap.json \
+            --overlay data/manual/cctld-rdap-servers.json \
+            --emit-bootstrap data/generated/dns.json
+      - name: Publish copies
+        run: |
+          cp data/generated/dns.json site/dns.json
+          cp data/manual/cctld-rdap-servers.json site/rdap-cctld-servers.json
+      - name: Fail if generated data is stale
+        run: git diff --exit-code

@@ -79,23 +79,33 @@ we list so stale entries surface early.
 ### Coverage
 
 `rdap-lookup --coverage` joins a generated classification index
-(`data/tlds.json`, derived from IANA's Root DB and the root-zone TLD list) with
-the bootstrap and overlay. It reports how many delegated ccTLDs have RDAP
-routing — via IANA or via our overlay — and lists the ones that still don't,
-which is the work queue for new overlay entries. `--tlds <PATH>` overrides the
-embedded index.
+(`data/generated/tlds.json`, derived from IANA's Root Zone Database and root
+zone TLD list) with the bootstrap and overlay. It reports how many delegated
+ccTLDs have RDAP routing — via IANA or via our overlay — and lists the ones that
+still don't, which is the work queue for new overlay entries. `--tlds <PATH>`
+overrides the embedded index.
 
 ## The data
 
-| File | Purpose |
-| --- | --- |
-| `data/rdap-cctld-servers.json` | Supplemental ccTLD RDAP servers IANA omits. |
-| `data/tlds.json` | Generated TLD classification (`cctld`/`gtld`/`infrastructure` + `delegated`), derived from IANA. |
+Three tiers, one direction: `official` + `manual` → `generated` → published.
 
-The overlay carries a top-level `publication` timestamp (ISO 8601 UTC, e.g. `2026-10-18T15:48:14Z`), mirroring IANA's bootstrap. Each server entry carries `tld`, `rdap_server`, `backend_operator`, `date_updated`, `evidence`, and an optional `source`. See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
+```
+data/
+├── official/       # verbatim IANA snapshots (never hand-edited)
+├── manual/         # hand-edited inputs, reviewed in PRs
+└── generated/      # machine output (never hand-edited)
+```
 
-`data/tlds.json` is generated from IANA's Root Zone Database and root zone TLD
-list by `scripts/gen-tlds.py`; don't edit it by hand.
+| File | Tier | Purpose |
+| --- | --- | --- |
+| `data/official/iana-rdap-bootstrap.json` | official | IANA's RFC 7484 bootstrap, as fetched. |
+| `data/official/iana-root-zone-tlds.txt` | official | Root zone TLD list (delegation). |
+| `data/official/iana-root-zone-db.html.gz` | official | Root Zone Database (TLD type). |
+| `data/manual/cctld-rdap-servers.json` | manual | Supplemental ccTLD RDAP servers IANA omits. |
+| `data/generated/tlds.json` | generated | TLD classification (`cctld`/`gtld`/`infrastructure` + `delegated`). |
+| `data/generated/dns.json` | generated | Merged RFC 7484 bootstrap; copied verbatim to `site/dns.json`. |
+
+The overlay carries a top-level `publication` timestamp (ISO 8601 UTC, e.g. `2026-10-18T15:48:14Z`), mirroring IANA's bootstrap. Each server entry carries `tld`, `rdap_server`, `backend_operator`, `date_updated`, `evidence`, and an optional `source`. See [CONTRIBUTING.md](CONTRIBUTING.md) to add one; the tiers are described in [data/README.md](data/README.md).
 
 Resolution rules:
 
@@ -109,6 +119,17 @@ Resolution rules:
 cargo fmt --all
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
+```
+
+Regenerate derived data (after `fetch-official.py`, the rest runs offline):
+
+```sh
+python scripts/fetch-official.py          # refresh the IANA snapshot (network)
+python scripts/gen-tlds.py                # -> data/generated/tlds.json
+rdap-lookup --iana data/official/iana-rdap-bootstrap.json \
+    --emit-bootstrap data/generated/dns.json
+cp data/generated/dns.json site/dns.json
+cp data/manual/cctld-rdap-servers.json site/rdap-cctld-servers.json
 ```
 
 ## License

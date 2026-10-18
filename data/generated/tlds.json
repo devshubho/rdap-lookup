@@ -1,7 +1,7 @@
 {
   "version": "1",
-  "publication": "2026-10-18T15:41:40Z",
-  "source": "IANA Root Zone Database + root zone TLD list (https://www.iana.org/domains/root/db, https://data.iana.org/TLD/tlds-alpha-by-domain.txt)",
+  "publication": "2026-10-18T16:03:58Z",
+  "source": "IANA Root Zone Database + root zone TLD list; see data/official/manifest.json",
   "tlds": [
     {"tld":"aaa","type":"gtld","delegated":true},
     {"tld":"aarp","type":"gtld","delegated":true},

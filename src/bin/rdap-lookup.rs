@@ -20,7 +20,7 @@ struct Cli {
     domain: Option<String>,
 
     /// Supplemental ccTLD overlay JSON.
-    #[arg(long, default_value = "data/rdap-cctld-servers.json")]
+    #[arg(long, default_value = "data/manual/cctld-rdap-servers.json")]
     overlay: PathBuf,
 
     /// Directory for the cached IANA bootstrap.
@@ -30,6 +30,10 @@ struct Cli {
     /// IANA bootstrap URL (override for self-hosting or testing).
     #[arg(long, default_value_t = String::from(IANA_BOOTSTRAP_URL))]
     bootstrap_url: String,
+
+    /// Read the IANA bootstrap from a local file instead of fetching it.
+    #[arg(long, value_name = "PATH")]
+    iana: Option<PathBuf>,
 
     /// Print the RDAP server URL without querying it.
     #[arg(long)]
@@ -67,10 +71,14 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     let cache = Cache::new(cli.cache_dir.clone().unwrap_or_else(default_cache_dir));
-    let iana = cache
-        .get_or_fetch(&cli.bootstrap_url)
-        .await
-        .context("fetching IANA RDAP bootstrap")?;
+    let iana = match cli.iana.as_deref() {
+        Some(path) => std::fs::read_to_string(path)
+            .with_context(|| format!("reading IANA bootstrap {}", path.display()))?,
+        None => cache
+            .get_or_fetch(&cli.bootstrap_url)
+            .await
+            .context("fetching IANA RDAP bootstrap")?,
+    };
     let mut directory = ServerDirectory::from_iana(&iana).context("parsing IANA RDAP bootstrap")?;
 
     let overlay = load_overlay(&cli)?;

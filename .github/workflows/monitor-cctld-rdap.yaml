@@ -15,7 +15,7 @@ jobs:
       - name: Probe each supplemental ccTLD server
         run: |
           set -u
-          mapfile -t rows < <(jq -r '.servers[] | "\(.tld)\t\(.rdap_server)"' data/rdap-cctld-servers.json)
+          mapfile -t rows < <(jq -r '.servers[] | "\(.tld)\t\(.rdap_server)"' data/manual/cctld-rdap-servers.json)
           fail=0
           printf '%-6s %-48s %s\n' TLD SOURCE CODE
           for row in "${rows[@]}"; do

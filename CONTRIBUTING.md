@@ -4,7 +4,7 @@ Thanks for helping keep RDAP coverage complete.
 
 ## Adding or fixing a ccTLD RDAP server
 
-The most useful contribution is a correction to `data/rdap-cctld-servers.json`.
+The most useful contribution is a correction to `data/manual/cctld-rdap-servers.json`.
 
 1. Add or edit an entry:
    ```json
@@ -27,6 +27,17 @@ The most useful contribution is a correction to `data/rdap-cctld-servers.json`.
    (`YYYY-MM-DDTHH:MM:SSZ`).
 4. IANA always wins. Overlay entries are used only for TLDs IANA's bootstrap
    does not cover, so a duplicate is harmless but will be ignored.
+5. Sync the published copies and the merged product:
+
+   ```sh
+   cp data/manual/cctld-rdap-servers.json site/rdap-cctld-servers.json
+   rdap-lookup --iana data/official/iana-rdap-bootstrap.json \
+       --emit-bootstrap data/generated/dns.json
+   cp data/generated/dns.json site/dns.json
+   ```
+
+   Tests assert `site/` is byte-identical to the sources, so a missed copy
+   fails CI.
 
 ## Development
 
@@ -36,7 +47,9 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 ```
 
-`data/tlds.json` is generated from IANA; regenerate it with
-`python scripts/gen-tlds.py`.
+The `data/` tiers are `official/` (verbatim IANA snapshots, refresh with
+`python scripts/fetch-official.py`), `manual/` (hand-edited), and `generated/`
+(machine output, e.g. `python scripts/gen-tlds.py`). Never hand-edit `official/`
+or `generated/`; see [data/README.md](data/README.md).
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).

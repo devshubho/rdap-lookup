@@ -12,13 +12,13 @@ This product includes data derived from the following sources:
   https://www.iana.org/domains/root/db
   https://data.iana.org/TLD/tlds-alpha-by-domain.txt
   Published by the Internet Assigned Numbers Authority (IANA).
-  data/tlds.json is generated from these by scripts/gen-tlds.py.
+  data/generated/tlds.json is generated from these by scripts/gen-tlds.py.
   IANA does not endorse this project.
 
-The RDAP servers in data/rdap-cctld-servers.json were independently located and
+The RDAP servers in data/manual/cctld-rdap-servers.json were independently located and
 probed by this project; each entry carries its own evidence. iana-data
 (https://github.com/devshubho/iana-data) served as inspiration only and is not a
 data source.
 
-The supplemental ccTLD entries in data/rdap-cctld-servers.json are contributed under
+The supplemental ccTLD entries in data/manual/cctld-rdap-servers.json are contributed under
 CC0-1.0; the software is licensed under MIT (see LICENSE).
