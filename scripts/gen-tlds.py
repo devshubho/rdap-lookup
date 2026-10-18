@@ -111,6 +111,12 @@ def build(kinds: dict[str, str], zone: set[str], publication: str) -> str:
         '  "version": "1",',
         f'  "publication": "{publication}",',
         '  "source": "IANA Root Zone Database + root zone TLD list; see data/official/manifest.json",',
+        (
+            '  "description": "TLD classification index derived from IANA: '
+            'cctld/gtld/infrastructure plus a delegated flag. Maintained '
+            'independently by rdapserver.org; not affiliated with or endorsed '
+            'by IANA.",'
+        ),
         '  "tlds": [',
     ]
     for index, entry in enumerate(entries):

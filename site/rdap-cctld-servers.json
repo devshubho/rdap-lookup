@@ -1,7 +1,7 @@
 {
   "version": "2",
   "publication": "2026-10-18T15:48:14Z",
-  "description": "Supplemental RDAP servers for ccTLDs that IANA's RFC 7484 bootstrap omits. Each entry is independently probed by this project (see evidence) and re-checked by the monitor workflow. IANA always wins: an entry here is used only when IANA does not already cover the TLD.",
+  "description": "Supplemental RDAP servers for ccTLDs that IANA's RFC 7484 bootstrap omits. Each entry is independently probed by this project (see evidence) and re-checked by the monitor workflow. IANA always wins: an entry here is used only when IANA does not already cover the TLD. Maintained independently by rdapserver.org; not affiliated with or endorsed by IANA.",
   "sources": {
     "iana_bootstrap": "https://data.iana.org/rdap/dns.json"
   },

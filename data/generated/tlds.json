@@ -2,6 +2,7 @@
   "version": "1",
   "publication": "2026-10-18T16:03:58Z",
   "source": "IANA Root Zone Database + root zone TLD list; see data/official/manifest.json",
+  "description": "TLD classification index derived from IANA: cctld/gtld/infrastructure plus a delegated flag. Maintained independently by rdapserver.org; not affiliated with or endorsed by IANA.",
   "tlds": [
     {"tld":"aaa","type":"gtld","delegated":true},
     {"tld":"aarp","type":"gtld","delegated":true},
