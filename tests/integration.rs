@@ -2,7 +2,7 @@
 
 use rdap_lookup::{Overlay, ServerDirectory, TldIndex, resolve_tld, to_ascii};
 
-const OVERLAY: &str = include_str!("../data/rdap-servers.json");
+const OVERLAY: &str = include_str!("../data/rdap-cctld-servers.json");
 
 const IANA: &str = r#"{
     "publication": "2026-01-01T00:00:00Z",
@@ -67,10 +67,10 @@ fn idn_domains_are_punycoded() {
 
 #[test]
 fn published_overlay_matches_source() {
-    const PUBLISHED: &str = include_str!("../site/rdap-servers.json");
+    const PUBLISHED: &str = include_str!("../site/rdap-cctld-servers.json");
     assert_eq!(
         PUBLISHED, OVERLAY,
-        "site/rdap-servers.json must stay byte-identical to data/rdap-servers.json"
+        "site/rdap-cctld-servers.json must stay byte-identical to data/rdap-cctld-servers.json"
     );
 }
 

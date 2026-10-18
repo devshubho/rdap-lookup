@@ -4,7 +4,7 @@ Thanks for helping keep RDAP coverage complete.
 
 ## Adding or fixing a ccTLD RDAP server
 
-The most useful contribution is a correction to `data/rdap-servers.json`.
+The most useful contribution is a correction to `data/rdap-cctld-servers.json`.
 
 1. Add or edit an entry:
    ```json

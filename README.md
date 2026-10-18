@@ -34,7 +34,7 @@ let cache = Cache::new(std::env::temp_dir().join("rdap-lookup"));
 let iana = cache.get_or_fetch(IANA_BOOTSTRAP_URL).await?;
 
 let mut directory = ServerDirectory::from_iana(&iana)?;
-let overlay: Overlay = serde_json::from_str(include_str!("data/rdap-servers.json"))?;
+let overlay: Overlay = serde_json::from_str(include_str!("data/rdap-cctld-servers.json"))?;
 directory.merge_overlay(&overlay);
 
 let tld = rdap_lookup::resolve_tld("пример.рф")?;    // "xn--p1ai"
@@ -60,7 +60,7 @@ rdap-lookup --emit-bootstrap dns.json
 The merged directory is published at
 <https://data.rdapserver.org/dns.json>, so an RDAP client only needs one URL.
 The raw overlay is published alongside it at
-<https://data.rdapserver.org/rdap-servers.json>. TLDs sharing a server are
+<https://data.rdapserver.org/rdap-cctld-servers.json>. TLDs sharing a server are
 grouped, and IANA entries always win.
 
 ## ccTLD RDAP servers
@@ -89,7 +89,7 @@ embedded index.
 
 | File | Purpose |
 | --- | --- |
-| `data/rdap-servers.json` | Supplemental ccTLD RDAP servers IANA omits. |
+| `data/rdap-cctld-servers.json` | Supplemental ccTLD RDAP servers IANA omits. |
 
 The file carries a top-level `publication` timestamp (ISO 8601 UTC, e.g. `2026-10-18T07:24:09Z`), mirroring IANA's bootstrap. Each server entry carries `tld`, `rdap_server`, `backend_operator`, `date_updated`, and `source` (evidence). See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
 

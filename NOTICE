@@ -11,8 +11,8 @@ This product includes data derived from the following sources:
 - iana-data
   https://github.com/devshubho/iana-data
   MIT License, Copyright (c) 2025 Eric Case.
-  The supplemental ccTLD RDAP servers in data/rdap-servers.json are seeded
+  The supplemental ccTLD RDAP servers in data/rdap-cctld-servers.json are seeded
   from this project's curated dataset.
 
-The supplemental ccTLD entries in data/rdap-servers.json are contributed under
+The supplemental ccTLD entries in data/rdap-cctld-servers.json are contributed under
 CC0-1.0; the software is licensed under MIT (see LICENSE).

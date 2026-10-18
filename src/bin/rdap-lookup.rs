@@ -20,7 +20,7 @@ struct Cli {
     domain: Option<String>,
 
     /// Supplemental ccTLD overlay JSON.
-    #[arg(long, default_value = "data/rdap-servers.json")]
+    #[arg(long, default_value = "data/rdap-cctld-servers.json")]
     overlay: PathBuf,
 
     /// Directory for the cached IANA bootstrap.

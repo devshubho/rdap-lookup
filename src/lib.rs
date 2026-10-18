@@ -13,7 +13,7 @@
 //! let iana = cache.get_or_fetch(IANA_BOOTSTRAP_URL).await?;
 //! let mut directory = ServerDirectory::from_iana(&iana)?;
 //!
-//! let overlay: Overlay = serde_json::from_str(include_str!("../data/rdap-servers.json"))?;
+//! let overlay: Overlay = serde_json::from_str(include_str!("../data/rdap-cctld-servers.json"))?;
 //! directory.merge_overlay(&overlay);
 //!
 //! let tld = rdap_lookup::resolve_tld("example.com")?;
