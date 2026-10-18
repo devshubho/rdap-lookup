@@ -18,7 +18,9 @@ The most useful contribution is a correction to `data/rdap-servers.json`.
    ```
 2. The server must answer `GET {rdap_server}domain/nic.{tld}` with HTTP 200,
    `content-type: application/rdap+json`, and `$.objectClassName == "domain"`.
-3. IANA always wins. Overlay entries are used only for TLDs IANA's bootstrap
+3. Bump the top-level `publication` timestamp to the current UTC time
+   (`YYYY-MM-DDTHH:MM:SSZ`).
+4. IANA always wins. Overlay entries are used only for TLDs IANA's bootstrap
    does not cover, so a duplicate is harmless but will be ignored.
 
 ## Development

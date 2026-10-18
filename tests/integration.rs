@@ -64,3 +64,13 @@ fn resolves_cc_tld_from_overlay() {
 fn idn_domains_are_punycoded() {
     assert_eq!(to_ascii("пример.рф").unwrap(), "xn--e1afmkfd.xn--p1ai");
 }
+
+#[test]
+fn overlay_carries_a_publication_timestamp() {
+    let overlay: Overlay = serde_json::from_str(OVERLAY).unwrap();
+    let publication = overlay.publication().expect("publication present");
+    assert!(
+        publication.ends_with('Z') && publication.len() == 20,
+        "expected ISO 8601 UTC like 2026-10-18T07:24:09Z, got {publication}"
+    );
+}

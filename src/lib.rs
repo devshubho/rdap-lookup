@@ -37,3 +37,25 @@ pub use cache::Cache;
 pub use client::RdapClient;
 pub use error::{Error, Result};
 pub use resolver::{resolve_tld, to_ascii};
+
+/// The current time in UTC, formatted as `YYYY-MM-DDTHH:MM:SSZ`.
+///
+/// The trailing `Z` marks UTC, matching IANA's bootstrap publication format.
+///
+/// ```
+/// let stamp = rdap_lookup::utc_now_z();
+/// assert!(stamp.ends_with('Z'));
+/// assert_eq!(stamp.len(), 20);
+/// ```
+pub fn utc_now_z() -> String {
+    let now = time::OffsetDateTime::now_utc();
+    format!(
+        "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
+        now.year(),
+        u8::from(now.month()),
+        now.day(),
+        now.hour(),
+        now.minute(),
+        now.second(),
+    )
+}

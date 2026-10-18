@@ -49,7 +49,7 @@ let record = RdapClient::new().lookup(server, &domain).await?;
 | --- | --- |
 | `data/rdap-servers.json` | Supplemental ccTLD RDAP servers IANA omits. |
 
-Each entry carries `tld`, `rdap_server`, `backend_operator`, `date_updated`, and `source` (evidence). See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
+The file carries a top-level `publication` timestamp (ISO 8601 UTC, e.g. `2026-10-18T07:24:09Z`), mirroring IANA's bootstrap. Each server entry carries `tld`, `rdap_server`, `backend_operator`, `date_updated`, and `source` (evidence). See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
 
 Resolution rules:
 

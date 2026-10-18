@@ -60,7 +60,12 @@ async fn main() -> Result<()> {
         let overlay: Overlay = serde_json::from_str(&raw)
             .with_context(|| format!("parsing overlay {}", cli.overlay.display()))?;
         let added = directory.merge_overlay(&overlay);
-        tracing::info!("overlay added {added} supplemental server(s)");
+        match overlay.publication() {
+            Some(publication) => {
+                tracing::info!("overlay published {publication}; added {added} server(s)")
+            }
+            None => tracing::info!("overlay added {added} supplemental server(s)"),
+        }
     } else {
         tracing::warn!(
             "overlay {} not found; using IANA bootstrap only",

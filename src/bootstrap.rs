@@ -50,8 +50,24 @@ pub struct OverlayEntry {
 /// A supplemental overlay document.
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct Overlay {
+    /// When the overlay was last published, ISO 8601 with a `Z` suffix, e.g.
+    /// `2026-10-18T07:24:09Z`.
+    #[serde(default)]
+    pub publication: Option<String>,
     #[serde(default)]
     pub servers: Vec<OverlayEntry>,
+}
+
+impl Overlay {
+    /// The overlay's publication timestamp, when present.
+    pub fn publication(&self) -> Option<&str> {
+        self.publication.as_deref()
+    }
+
+    /// Set `publication` to the current UTC time (`YYYY-MM-DDTHH:MM:SSZ`).
+    pub fn stamp(&mut self) {
+        self.publication = Some(crate::utc_now_z());
+    }
 }
 
 /// A resolved `tld -> RDAP servers` index.
@@ -173,6 +189,7 @@ mod tests {
     fn overlay_fills_gaps_only() {
         let mut directory = ServerDirectory::from_iana(IANA).unwrap();
         let overlay = Overlay {
+            publication: None,
             servers: vec![
                 OverlayEntry {
                     tld: "io".into(),
@@ -201,6 +218,15 @@ mod tests {
             "https://rdap.iana.ch/",
             "IANA wins over the overlay"
         );
+    }
+
+    #[test]
+    fn stamp_sets_utc_publication() {
+        let mut overlay = Overlay::default();
+        overlay.stamp();
+        let stamp = overlay.publication().expect("stamped");
+        assert!(stamp.ends_with('Z'), "got {stamp}");
+        assert_eq!(stamp.len(), 20, "got {stamp}");
     }
 
     #[test]
