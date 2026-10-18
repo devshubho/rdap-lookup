@@ -6,7 +6,7 @@
     <title>:: about.rdapserver.org :: the RDAP server directory ::</title>
     <meta
       name="description"
-      content="A curated RDAP server directory: IANA's bootstrap plus hand-maintained ccTLD servers, served from one stable URL."
+      content="A curated RDAP server directory: IANA's bootstrap plus hand-maintained ASCII and IDN (Punycode) ccTLD servers, served from one stable URL."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -107,6 +107,14 @@ nic.ch&#9;.ch&#9;https://rdap.nic.ch/</code></pre>
           official page, sometimes a best-effort guess. Since ccTLD URLs move, a
           scheduled check probes the servers we list so stale ones surface early.
         </p>
+        <p>
+          <strong>IDN ccTLDs</strong> are covered too, each keyed by its Punycode
+          A-label. The overlay currently routes <code>.한국</code>
+          (<code>xn--3e0b707e</code>, KRNIC), <code>.भारत</code>
+          (<code>xn--h2brj9c</code>, NIXI) and <code>.ভারত</code>
+          (<code>xn--45brj9c</code>, NIXI), so a client that punycodes Unicode
+          input resolves them like any other TLD.
+        </p>
       </section>
 
       <hr class="rule" />
@@ -137,7 +145,7 @@ nic.ch&#9;.ch&#9;https://rdap.nic.ch/</code></pre>
         <p class="status">*** SMALL DATA &middot; ALL IN ONE PLACE ***</p>
         <p class="counter">
           ccTLD servers in the overlay:
-          <span class="digits">1</span><span class="digits">9</span>
+          <span class="digits">2</span><span class="digits">2</span>
         </p>
         <p class="badges">
           Hand-rolled HTML &middot; no JavaScript &middot; no tracking &middot;
