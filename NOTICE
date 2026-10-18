@@ -1,0 +1,18 @@
+rdap-lookup
+Copyright (c) 2026 devshubho
+
+This product includes data derived from the following sources:
+
+- IANA RDAP Bootstrap File (RFC 7484)
+  https://data.iana.org/rdap/dns.json
+  Published by the Internet Assigned Numbers Authority (IANA).
+  IANA does not endorse this project.
+
+- iana-data
+  https://github.com/devshubho/iana-data
+  MIT License, Copyright (c) 2025 Eric Case.
+  The supplemental ccTLD RDAP servers in data/rdap-servers.json are seeded
+  from this project's curated dataset.
+
+The supplemental ccTLD entries in data/rdap-servers.json are contributed under
+CC0-1.0; the software is licensed under MIT (see LICENSE).
