@@ -127,9 +127,8 @@ nic.ch&#9;.ch&#9;https://rdap.nic.ch/</code></pre>
           <h2>&gt; NO RDAP?</h2>
           <p>
             Not every ccTLD runs an RDAP server. When none is known, fall back to
-            WHOIS &mdash; the full TLD dataset (from the
-            <a href="https://github.com/devshubho/iana-data">iana-data</a> project)
-            carries <code>whois_server</code> alongside <code>rdap_server</code>.
+            WHOIS &mdash; this project routes RDAP only, so clients should query a
+            WHOIS service on their own.
           </p>
         </section>
       </div>

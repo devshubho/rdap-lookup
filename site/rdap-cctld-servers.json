@@ -5,7 +5,6 @@
   "sources": {
     "iana_bootstrap": "https://data.iana.org/rdap/dns.json"
   },
-  "inspired_by": "https://github.com/devshubho/iana-data",
   "servers": [
     {
       "tld": "ac",
