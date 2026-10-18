@@ -70,9 +70,9 @@ ccTLDs each govern themselves, so every one decides on its own whether to run
 RDAP, WHOIS, or neither. IANA's bootstrap lists only some of them — the rest are
 the gaps this project fills.
 
-Each overlay entry records where its URL came from (`source`) and when it was
-last confirmed (`date_updated`): usually an official page, sometimes a
-best-effort guess. Because ccTLD URLs move, a
+Each overlay entry records when it was last confirmed (`date_updated`), the
+observation that confirmed it (`evidence`), and an official reference (`source`)
+when one exists. Because ccTLD URLs move, a
 [scheduled check](.github/workflows/monitor-cctld-rdap.yaml) probes the servers
 we list so stale entries surface early.
 
@@ -90,14 +90,18 @@ embedded index.
 | File | Purpose |
 | --- | --- |
 | `data/rdap-cctld-servers.json` | Supplemental ccTLD RDAP servers IANA omits. |
+| `data/tlds.json` | Generated TLD classification (`cctld`/`gtld`/`infrastructure` + `delegated`), derived from IANA. |
 
-The file carries a top-level `publication` timestamp (ISO 8601 UTC, e.g. `2026-10-18T07:24:09Z`), mirroring IANA's bootstrap. Each server entry carries `tld`, `rdap_server`, `backend_operator`, `date_updated`, and `source` (evidence). See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
+The overlay carries a top-level `publication` timestamp (ISO 8601 UTC, e.g. `2026-10-18T15:48:14Z`), mirroring IANA's bootstrap. Each server entry carries `tld`, `rdap_server`, `backend_operator`, `date_updated`, `evidence`, and an optional `source`. See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
+
+`data/tlds.json` is generated from IANA's Root Zone Database and root zone TLD
+list by `scripts/gen-tlds.py`; don't edit it by hand.
 
 Resolution rules:
 
 - TLDs are matched by their ASCII **A-label** form; IDNs are punycoded before lookup.
 - Precedence: **IANA bootstrap → supplemental overlay**.
-- When no server is known, callers fall back to WHOIS (see `whois_server` in a full `tlds.json`).
+- When no server is known, callers can fall back to WHOIS themselves; the directory only routes RDAP.
 
 ## Development
 
@@ -110,5 +114,5 @@ cargo test --all-features
 ## License
 
 MIT for the software (see [LICENSE](LICENSE)). Supplemental data is contributed
-under CC0-1.0. IANA and iana-data attribution is in [NOTICE](NOTICE). IANA does
-not endorse this project.
+under CC0-1.0. Attribution is in [NOTICE](NOTICE); the ccTLD servers were
+independently probed by this project. IANA does not endorse this project.

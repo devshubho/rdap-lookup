@@ -43,9 +43,12 @@ pub struct OverlayEntry {
     /// Date the entry was last confirmed, `YYYY-MM-DD`.
     #[serde(default)]
     pub date_updated: Option<String>,
-    /// Where the URL came from.
+    /// An official reference for the entry, when one exists.
     #[serde(default)]
     pub source: Option<String>,
+    /// The observation that confirmed the server, e.g. an RDAP probe result.
+    #[serde(default)]
+    pub evidence: Option<String>,
 }
 
 /// A supplemental overlay document.
@@ -236,6 +239,7 @@ mod tests {
                     backend_operator: None,
                     date_updated: None,
                     source: None,
+                    evidence: None,
                 },
                 OverlayEntry {
                     tld: "ch".into(),
@@ -243,6 +247,7 @@ mod tests {
                     backend_operator: None,
                     date_updated: None,
                     source: None,
+                    evidence: None,
                 },
             ],
         };
@@ -289,6 +294,7 @@ mod tests {
                 backend_operator: None,
                 date_updated: None,
                 source: None,
+                evidence: None,
             }],
         };
         directory.merge_overlay(&overlay);

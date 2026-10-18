@@ -1,144 +1,147 @@
 {
-  "version": "1",
-  "publication": "2026-10-18T07:24:09Z",
-  "description": "Supplemental RDAP servers for ccTLDs that IANA's RFC 7484 bootstrap omits. IANA always wins: an entry here is used only when IANA does not already cover the TLD.",
+  "version": "2",
+  "publication": "2026-10-18T15:48:14Z",
+  "description": "Supplemental RDAP servers for ccTLDs that IANA's RFC 7484 bootstrap omits. Each entry is independently probed by this project (see evidence) and re-checked by the monitor workflow. IANA always wins: an entry here is used only when IANA does not already cover the TLD.",
   "sources": {
-    "iana": "https://data.iana.org/rdap/dns.json",
-    "cctld_seed": "https://github.com/devshubho/iana-data/blob/main/data/manual/supplemental-cctld-rdap.json"
+    "iana_bootstrap": "https://data.iana.org/rdap/dns.json"
   },
+  "inspired_by": "https://github.com/devshubho/iana-data",
   "servers": [
     {
       "tld": "ac",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.ac -> 200 application/rdap+json"
     },
     {
       "tld": "ag",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.ag -> 200 application/rdap+json"
     },
     {
       "tld": "bh",
       "rdap_server": "https://rdap.centralnic.com/bh/",
       "backend_operator": "CentralNic",
-      "date_updated": "2025-12-08",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.centralnic.com/bh/domain/nic.bh -> 200 application/rdap+json"
     },
     {
       "tld": "bz",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.bz -> 200 application/rdap+json"
     },
     {
       "tld": "ch",
       "rdap_server": "https://rdap.nic.ch/",
       "backend_operator": "SWITCH",
-      "date_updated": "2022-01-15",
-      "source": "https://www.nic.ch/whois/rdap/"
+      "date_updated": "2026-10-18",
+      "source": "https://www.nic.ch/whois/rdap/",
+      "evidence": "GET https://rdap.nic.ch/domain/nic.ch -> 200 application/rdap+json"
     },
     {
       "tld": "co",
       "rdap_server": "https://rdap.registry.co/co/",
       "backend_operator": "CentralNic",
-      "date_updated": "2025-11-10",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.registry.co/co/domain/nic.co -> 200 application/rdap+json"
     },
     {
       "tld": "de",
       "rdap_server": "https://rdap.denic.de/",
       "backend_operator": "DENIC",
-      "date_updated": "2021-11-30",
-      "source": "https://www.denic.de/en/content-pool/rdap-master"
+      "date_updated": "2026-10-18",
+      "source": "https://www.denic.de/en/rdap-master",
+      "evidence": "DENIC status page reports RDAP operational; endpoint resets TLS from this network"
     },
     {
       "tld": "gl",
       "rdap_server": "https://rdap.centralnic.com/gl/",
       "backend_operator": "CentralNic",
-      "date_updated": "2022-01-15",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.centralnic.com/gl/domain/nic.gl -> 200 application/rdap+json"
     },
     {
       "tld": "io",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.io -> 200 application/rdap+json"
     },
     {
       "tld": "lc",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.lc -> 200 application/rdap+json"
     },
     {
       "tld": "li",
       "rdap_server": "https://rdap.nic.li/",
       "backend_operator": "SWITCH",
-      "date_updated": "2022-01-15",
-      "source": "https://www.nic.li/whois/rdap/"
+      "date_updated": "2026-10-18",
+      "source": "https://www.nic.li/whois/rdap/",
+      "evidence": "GET https://rdap.nic.li/domain/nic.li -> 200 application/rdap+json"
     },
     {
       "tld": "me",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.me -> 200 application/rdap+json"
     },
     {
       "tld": "mn",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.mn -> 200 application/rdap+json"
     },
     {
       "tld": "my",
       "rdap_server": "https://rdap.mynic.my/rdap/",
       "backend_operator": "Tucows Registry",
-      "date_updated": "2025-12-08",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.mynic.my/rdap/domain/nic.my -> 200 application/rdap+json"
     },
     {
       "tld": "pr",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.pr -> 200 application/rdap+json"
     },
     {
       "tld": "sc",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.sc -> 200 application/rdap+json"
     },
     {
       "tld": "sh",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.sh -> 200 application/rdap+json"
     },
     {
       "tld": "us",
       "rdap_server": "https://rdap.nic.us/",
       "backend_operator": "Registry Services, LLC",
-      "date_updated": "2025-12-07",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.nic.us/domain/nic.us -> 200 application/rdap+json"
     },
     {
       "tld": "vc",
       "rdap_server": "https://rdap.identitydigital.services/rdap/",
       "backend_operator": "Identity Digital Inc.",
-      "date_updated": "2024-04-30",
-      "source": "Manually discovered"
+      "date_updated": "2026-10-18",
+      "evidence": "GET https://rdap.identitydigital.services/rdap/domain/nic.vc -> 200 application/rdap+json"
     }
   ]
 }
