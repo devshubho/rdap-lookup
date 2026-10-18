@@ -1,0 +1,33 @@
+name: Monitor ccTLD RDAP servers
+
+# ccTLD RDAP URLs move without notice, so probe the supplemental servers we
+# publish on a light schedule to surface stale entries early.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe each supplemental ccTLD server
+        run: |
+          set -u
+          mapfile -t rows < <(jq -r '.servers[] | "\(.tld)\t\(.rdap_server)"' data/rdap-servers.json)
+          fail=0
+          printf '%-6s %-48s %s\n' TLD SOURCE CODE
+          for row in "${rows[@]}"; do
+            tld="${row%%$'\t'*}"
+            url="${row#*$'\t'}"
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "$url" || echo 000)
+            printf '%-6s %-48s %s\n' "$tld" "$url" "$code"
+            case "$code" in
+              000|5*) fail=1 ;;
+            esac
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::one or more ccTLD RDAP servers were unreachable or returned 5xx"
+            exit 1
+          fi

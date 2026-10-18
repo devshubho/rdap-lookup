@@ -57,6 +57,19 @@ The merged directory is published at
 <https://data.rdapserver.org/dns.json>, so an RDAP client only needs one URL.
 TLDs sharing a server are grouped, and IANA entries always win.
 
+## ccTLD RDAP servers
+
+ICANN governs the gTLDs and requires each to run an RDAP server. The roughly 250
+ccTLDs each govern themselves, so every one decides on its own whether to run
+RDAP, WHOIS, or neither. IANA's bootstrap lists only some of them — the rest are
+the gaps this project fills.
+
+Each overlay entry records where its URL came from (`source`) and when it was
+last confirmed (`date_updated`): usually an official page, sometimes a
+best-effort guess. Because ccTLD URLs move, a
+[scheduled check](.github/workflows/monitor-cctld-rdap.yaml) probes the servers
+we list so stale entries surface early.
+
 ## The data
 
 | File | Purpose |

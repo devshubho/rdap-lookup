@@ -93,6 +93,22 @@ example.com&#9;.com&#9;https://rdap.verisign.com/com/v1/
 nic.ch&#9;.ch&#9;https://rdap.nic.ch/</code></pre>
       </section>
 
+      <section class="panel wide">
+        <h2>&gt; ccTLD RDAP SERVERS</h2>
+        <p>
+          ICANN governs the gTLDs and <em>requires</em> each one to run RDAP. The
+          ~250 ccTLDs each govern themselves, so every one decides on its own
+          whether to run RDAP, WHOIS, or neither. IANA's bootstrap lists only some
+          of them &mdash; the rest are the gaps this project fills.
+        </p>
+        <p>
+          Every entry records where we found the URL (<code>source</code>) and when
+          it was last confirmed (<code>date_updated</code>) &mdash; usually an
+          official page, sometimes a best-effort guess. Since ccTLD URLs move, a
+          scheduled check probes the servers we list so stale ones surface early.
+        </p>
+      </section>
+
       <hr class="rule" />
 
       <div class="cols">
